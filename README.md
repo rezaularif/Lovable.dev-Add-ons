@@ -4,18 +4,21 @@
 [![Version](https://img.shields.io/badge/version-2.1.3-blue.svg)](https://github.com/yourusername/lovable-dev-addons/releases)
 [![Chrome Web Store](https://img.shields.io/badge/Chrome-Web%20Store-blue.svg)](https://chrome.google.com/webstore)
 
-A powerful Chrome extension that enhances your Lovable.dev development workflow with essential productivity tools and utilities. Built with vanilla JavaScript following Chrome's Manifest V3 specifications for optimal performance and security.
+A powerful Chrome extension that supercharges your Lovable.dev development workflow with an intelligent prompt queue system and essential productivity tools. Built with vanilla JavaScript following Chrome's Manifest V3 specifications for optimal performance and security.
 
 ## ✨ Features
 
-### 🚀 Prompt Queue
+### 🚀 Prompt Queue (Primary Feature)
 - **Smart Queuing System**: Queue multiple prompts while one is processing on project pages
+- **Intelligent Send Button Detection**: Waits for Lovable.dev's send button to be available and enabled
 - **Minimal Dark UI**: Clean dark gray (#272725) queue items with white text
 - **Keyboard Shortcuts**: Press `Shift+Enter` to add prompts to queue
-- **Automatic Processing**: Sequential prompt execution with 500ms delay
+- **Automatic Sequential Processing**: Reliable prompt execution with proper timing
 - **Real-time Status**: Visual indicators showing [NEXT/SENDING/FAILED] status
 - **Silent Operation**: No intrusive notifications or popups
 - **Smart Visibility**: Queue only appears when prompts are queued (zero UI clutter)
+- **Robust Error Recovery**: Failed prompts remain in queue for retry
+- **Project Page Detection**: Only activates on actual project pages, not homepage
 
 ### 🤖 Enhanced Prompt Tools
 - **AI-Powered Enhancement**: Groq API integration for prompt optimization
@@ -61,15 +64,31 @@ A powerful Chrome extension that enhances your Lovable.dev development workflow 
 ### Prompt Queue
 The Prompt Queue feature automatically activates on Lovable.dev project pages:
 
-1. **Navigate to a Project**: Open any project on Lovable.dev
+#### Getting Started
+1. **Navigate to a Project**: Open any project on Lovable.dev (URLs with `/projects/`)
 2. **Add Prompts**: Type your prompt and press `Shift+Enter` to add it to the queue
-3. **Visual Feedback**: Queue items appear above the chat input with:
-   - Numbered positions (1., 2., 3...)
-   - Prompt preview (truncated to ~60 characters)
-   - Status indicators for the active prompt
-   - Remove buttons (×) for individual management
-4. **Automatic Processing**: Prompts are sent sequentially without manual intervention
-5. **Error Recovery**: Failed prompts show retry options
+3. **Automatic Processing**: The first prompt starts processing automatically after a 1-second delay
+
+#### Visual Interface
+Queue items appear above the chat input with:
+- **Numbered positions** (1., 2., 3...) showing queue order
+- **Prompt preview** (truncated to ~60 characters with tooltip showing full text)
+- **Status indicators**: 
+  - `[NEXT]` - Ready to be sent next
+  - `[SENDING]` - Currently being processed
+  - `[FAILED]` - Error occurred, ready for retry
+- **Remove buttons** (×) for individual item management
+
+#### Smart Behavior
+- **Auto-Detection**: Only appears on project pages, never on homepage
+- **Button Waiting**: Waits for Lovable.dev's send button to be enabled before sending
+- **Error Handling**: Failed prompts remain in queue for manual retry or removal
+- **Clean UI**: Queue disappears when empty, no permanent UI clutter
+
+#### Advanced Features
+- **Interference Prevention**: Automatically closes blocking modals/overlays
+- **Completion Detection**: Multiple strategies to detect when responses finish
+- **Memory Management**: Proper cleanup when navigating between projects
 
 ### Enhanced Prompt
 1. **Setup API Key**: Configure your Groq API key in the extension settings
@@ -157,19 +176,24 @@ The extension requires the following permissions:
 
 ## 📋 Changelog
 
-### Version 2.1.3 (Latest)
-- **Major UI Redesign**: Minimal dark theme integration
-- **Enhanced Performance**: Optimized DOM observers and rendering
-- **Silent Operation**: Removed intrusive notifications
-- **Smart Interference Prevention**: Auto-closes blocking modals
-- **Improved Reliability**: Better error handling and recovery
+### Version 2.1.3 (Latest) - August 6, 2025
+- **🎯 Fixed First Prompt Registration**: Resolved timing issue where first prompt wasn't being registered
+- **🔍 Intelligent Send Button Detection**: Now properly waits for Lovable.dev's specific send button to be available
+- **⚡ Enhanced Send Logic**: Waits up to 15 seconds for send button to become enabled (not disabled or opacity-50)
+- **🎨 Major UI Redesign**: Minimal dark theme integration with clean positioning
+- **📈 Enhanced Performance**: Optimized DOM observers with proper throttling
+- **🔇 Silent Operation**: Removed all intrusive notifications and popups
+- **🛡️ Smart Interference Prevention**: Auto-closes blocking modals and overlays
+- **🔄 Improved Reliability**: Better error handling and graceful recovery
+- **📱 Smart Page Detection**: Only activates on project pages, never on homepage
+- **⚙️ Proper Initialization**: UI and keyboard handlers now properly synchronized
 
 ### Previous Versions
-- **2.1.2**: Initial prompt queue implementation
+- **2.1.2**: Initial prompt queue implementation with basic functionality
 - **2.0.0**: Fixed UI layout issues and improved CSS handling
-- **1.9.1**: Previous stable version
-- **1.5.1**: Removed search and color picker functionality
-- **1.5.0**: Initial version with all features
+- **1.9.1**: Previous stable version with enhanced prompt tools
+- **1.5.1**: Removed search and color picker functionality for performance
+- **1.5.0**: Initial version with all core features
 
 ## 🤝 Contributing
 
@@ -200,8 +224,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Performance problems**: Clear browser cache and restart
 
 ### Getting Help
-- Check the [documentation](docs/)
-- Review [troubleshooting guides](PROMPT_QUEUE_TROUBLESHOOTING.md)
+- **Quick start**: [Quick Reference Guide](QUICK_REFERENCE.md) - Essential info for new users
+- **Technical details**: [Technical Documentation](TECHNICAL_DOCUMENTATION.md) - For developers
+- **Problem solving**: [Troubleshooting Guide](PROMPT_QUEUE_TROUBLESHOOTING.md) - Fix common issues
 - Report issues on GitHub
 - Contact support through the Chrome Web Store
 

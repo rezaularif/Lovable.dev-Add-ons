@@ -113,39 +113,65 @@
       
       console.log('PromptQueue: Project page detected, initializing...');
       this._observer = null;
-      this._chatObserver = null;      
+      this._chatObserver = null;
+      this._initialized = false;
       
-      // Build minimal UI above chat
-      this._ensureUI();
-      
-      // Set up keyboard shortcuts
-      this._setupKeyboardHandlers();
+      // Build minimal UI above chat with callback for completion
+      this._ensureUI(() => {
+        // Set up keyboard shortcuts after UI is ready
+        this._setupKeyboardHandlers();
+        this._initialized = true;
+        console.log('PromptQueue: Initialization complete!');
+      });
       
       // Expose singleton on namespace for other features if needed
       LovableAddons.state.promptQueue = this;
-      
-      console.log('PromptQueue: Initialization complete!');
     },
 
     on(evt, handler) { return this._emitter.on(evt, handler); },
 
     enqueue(text) {
       const trimmed = (text || '').trim();
-      if (!trimmed) return;
+      if (!trimmed) {
+        console.warn('PromptQueue: Cannot enqueue empty text');
+        return;
+      }
+      
+      console.log('PromptQueue: Enqueuing prompt:', trimmed.substring(0, 50) + (trimmed.length > 50 ? '...' : ''));
       
       // Close any interfering overlays or modals
       this._closeInterferingElements();
       
       this._queue.push(trimmed);
-      this._renderQueue();
-      this._emitter.emit('queueChanged', this._queue.slice());
       
-      // Always try to start processing immediately with a small delay
+      // Ensure UI is available before rendering
+      if (!this._ui) {
+        console.log('PromptQueue: UI not ready, ensuring UI first...');
+        this._ensureUI(() => {
+          this._renderQueue();
+          this._emitter.emit('queueChanged', this._queue.slice());
+          // Start processing after UI is ready, only if this is the first item
+          if (this._queue.length === 1 && this._state === State.IDLE) {
+            this._startProcessingWithDelay();
+          }
+        });
+      } else {
+        this._renderQueue();
+        this._emitter.emit('queueChanged', this._queue.slice());
+        // Start processing only if this is the first item in queue
+        if (this._queue.length === 1 && this._state === State.IDLE) {
+          this._startProcessingWithDelay();
+        }
+      }
+    },
+    
+    _startProcessingWithDelay() {
+      // Delay processing to ensure everything is ready
       setTimeout(() => {
-        if (this._state === State.IDLE) {
+        if (this._state === State.IDLE && this._queue.length > 0) {
           this._dequeueAndSend();
         }
-      }, 500); // Small delay to ensure UI is ready
+      }, 1000); // Longer delay for first prompt to ensure chat is ready
     },
 
     clearQueue() {
@@ -217,11 +243,11 @@
       return isProjectURL && !isHomepage;
     },
 
-    _ensureUI() {
+    _ensureUI(callback) {
       // Try to find the textarea for chat
       let textArea = document.querySelector('textarea');
       if (!textArea) {
-        setTimeout(() => this._ensureUI(), 2000);
+        setTimeout(() => this._ensureUI(callback), 2000);
         return;
       }
       
@@ -255,6 +281,7 @@
             list: existingList
           };
           this._renderQueue();
+          if (callback) callback();
           return;
         }
       }
@@ -263,9 +290,9 @@
       const queueStack = document.createElement('div');
       queueStack.className = 'lovable-queue-stack';
       queueStack.style.cssText = `
-        margin-bottom: 8px;
+        margin-bottom: 12px;
         display: none;
-        font-family: inherit;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       `;
 
       // Queue list container - simple vertical list
@@ -274,7 +301,7 @@
       list.style.cssText = `
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 2px;
       `;
 
       queueStack.appendChild(list);
@@ -289,6 +316,9 @@
       };
       
       this._renderQueue();
+      
+      // Call the callback after UI is ready
+      if (callback) callback();
     },
     
     _addQueueIndicator() {
@@ -362,8 +392,7 @@
             this._mainTextArea.value = '';
             this._mainTextArea.dispatchEvent(new Event('input', { bubbles: true }));
             
-            // Show toast
-            LovableAddons.utils.toast?.showToast?.(`System busy - Added to queue: "${text.substring(0, 50)}${text.length > 50 ? '...' : ''}"`, 'info');
+            // No toast notification - silent operation
             
             return false;
           }
@@ -426,26 +455,42 @@
       // Clear list
       list.innerHTML = '';
       
+      // Add minimal hover styles if not already added
+      if (!document.querySelector('#lovable-queue-minimal-styles')) {
+        const minimalStyles = document.createElement('style');
+        minimalStyles.id = 'lovable-queue-minimal-styles';
+        minimalStyles.textContent = `
+          .lovable-queue-remove:hover {
+            opacity: 1 !important;
+          }
+        `;
+        document.head.appendChild(minimalStyles);
+      }
+      
       // Render queue items with minimal styling
       this._queue.forEach((prompt, idx) => {
+        const isFirst = idx === 0;
+        
         const item = document.createElement('div');
-        item.className = 'queue-item';
+        item.className = 'lovable-queue-item';
         item.style.cssText = `
           display: flex;
           align-items: center;
           gap: 8px;
-          padding: 6px 8px;
-          background: #272725;
-          border-radius: 4px;
-          font-size: 12px;
-          color: #fff;
+          padding: 4px 0;
+          font-size: 11px;
+          color: rgba(255, 255, 255, 0.8);
+          margin-bottom: 2px;
         `;
         
         // Position number
         const position = document.createElement('span');
         position.style.cssText = `
-          font-weight: bold;
-          color: ${idx === 0 ? '#007acc' : '#666'};
+          font-size: 10px;
+          font-weight: 500;
+          color: rgba(255, 255, 255, 0.6);
+          width: 16px;
+          text-align: center;
         `;
         position.textContent = `${idx + 1}.`;
         
@@ -456,19 +501,21 @@
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
+          font-weight: 400;
         `;
         const displayText = prompt.length > 60 ? prompt.substring(0, 60) + '...' : prompt;
         text.textContent = displayText;
         text.title = prompt;
         
-        // Status for first item
-        if (idx === 0) {
+        // Status for first item only
+        if (isFirst) {
           const status = document.createElement('span');
           status.style.cssText = `
-            font-size: 10px;
-            color: ${this._state === State.RUNNING ? '#007acc' : 
-                     this._state === State.ERRORED ? '#cc7a00' : '#00cc66'};
-            font-weight: bold;
+            font-size: 9px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
           `;
           status.textContent = `[${this._state === State.RUNNING ? 'SENDING' : 
                                     this._state === State.ERRORED ? 'FAILED' : 'NEXT'}]`;
@@ -477,15 +524,17 @@
         
         // Remove button
         const remove = document.createElement('button');
+        remove.className = 'lovable-queue-remove';
         remove.style.cssText = `
           border: none;
           background: none;
-          color: #999;
+          color: rgba(255, 255, 255, 0.3);
           cursor: pointer;
-          font-size: 14px;
+          font-size: 12px;
           padding: 0;
           width: 16px;
           height: 16px;
+          opacity: 0.5;
         `;
         remove.innerHTML = '×';
         remove.title = 'Remove';
@@ -528,15 +577,21 @@
         return;
       }
 
-      const prompt = this._queue.shift();
-      this._renderQueue();
+      // Don't remove from queue yet - just peek at first item
+      const prompt = this._queue[0];
+      this._currentPrompt = prompt;
+      
+      // Mark as running but keep in queue
+      this._setState(State.RUNNING);
 
       try {
-        this._currentPrompt = prompt;
         await this._sendPromptDom(prompt);
-        // Success: continue with next
+        // Success: NOW remove from queue
+        this._queue.shift();
         this._currentPrompt = null;
         this._setState(State.IDLE);
+        this._renderQueue();
+        
         if (this._queue.length) {
           // brief yield to allow UI settle
           setTimeout(() => this._dequeueAndSend(), 200);
@@ -546,7 +601,10 @@
         this._lastError = { error: err, prompt };
         this._currentPrompt = null;
         this._setState(State.ERRORED, { error: err });
-        // Removed error toast notification to avoid screen blocking
+        
+        // Keep the prompt in queue since it failed
+        // Don't remove it, let user retry or manually remove
+        console.log('PromptQueue: Keeping failed prompt in queue for retry');
       }
     },
 
@@ -555,30 +613,61 @@
      */
     _sendPromptDom(prompt) {
       return new Promise((resolve, reject) => {
-        const textArea = document.querySelector(SELECTORS.textArea);
-        const sendBtn = this._findSendButton();
-
-        if (!textArea || !sendBtn) {
-          reject(new Error('Chat elements not found'));
-          return;
-        }
-
-        console.log('PromptQueue: Sending prompt:', prompt);
-
-        // Set prompt in textarea and trigger events
-        textArea.value = prompt;
-        textArea.dispatchEvent(new Event('input', { bubbles: true }));
-        textArea.dispatchEvent(new Event('change', { bubbles: true }));
-
-        // Wait a short moment for the UI to update
-        setTimeout(() => {
-          // Check if send button is enabled
-          if (sendBtn.disabled) {
-            console.log('PromptQueue: Send button is disabled');
-            reject(new Error('Send button is disabled'));
+        console.log('PromptQueue: Starting to send prompt:', prompt.substring(0, 50) + '...');
+        
+        // Function to wait for send button to be available
+        const waitForSendButton = (attempts = 0) => {
+          const maxAttempts = 30; // 30 attempts * 500ms = 15 seconds max wait
+          
+          const textArea = document.querySelector(SELECTORS.textArea);
+          const sendBtn = this._findSendButton();
+          
+          if (!textArea) {
+            if (attempts < maxAttempts) {
+              console.log('PromptQueue: Waiting for textarea...');
+              setTimeout(() => waitForSendButton(attempts + 1), 500);
+            } else {
+              reject(new Error('Textarea not found after waiting'));
+            }
             return;
           }
-
+          
+          // Set prompt in textarea and trigger events
+          if (textArea.value !== prompt) {
+            textArea.value = prompt;
+            textArea.dispatchEvent(new Event('input', { bubbles: true }));
+            textArea.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+          
+          if (!sendBtn) {
+            if (attempts < maxAttempts) {
+              console.log('PromptQueue: Waiting for send button to appear...');
+              setTimeout(() => waitForSendButton(attempts + 1), 500);
+            } else {
+              reject(new Error('Send button not found after waiting'));
+            }
+            return;
+          }
+          
+          // Check if send button is disabled or has disabled styles
+          const isDisabled = sendBtn.disabled || 
+                            sendBtn.classList.contains('disabled') ||
+                            sendBtn.classList.contains('opacity-50') ||
+                            sendBtn.style.opacity === '0.5';
+          
+          if (isDisabled) {
+            if (attempts < maxAttempts) {
+              console.log('PromptQueue: Send button is disabled, waiting...');
+              setTimeout(() => waitForSendButton(attempts + 1), 500);
+            } else {
+              reject(new Error('Send button remained disabled after waiting'));
+            }
+            return;
+          }
+          
+          // Send button is available and enabled!
+          console.log('PromptQueue: Send button is ready, clicking now');
+          
           // Set up completion detection before clicking
           this._setupCompletionDetection(resolve, reject);
           
@@ -586,38 +675,41 @@
           this._setState(State.RUNNING);
           
           try {
-            console.log('PromptQueue: Clicking send button');
             sendBtn.click();
+            console.log('PromptQueue: Send button clicked successfully');
           } catch (e) {
             console.error('PromptQueue: Error clicking send button:', e);
             reject(e);
           }
-        }, 100); // Small delay to ensure textarea value is processed
+        };
+        
+        // Start the process
+        waitForSendButton();
       });
     },
 
     _findSendButton() {
-      // Try multiple approaches to find the send button
+      // Look for the specific send button with the Lovable.dev class structure
+      // The button has classes: flex size-6 items-center justify-center rounded-full bg-foreground text-background
       let sendBtn = null;
       
-      // First try: look for buttons with send-related attributes
+      // Primary: Look for button with the specific Lovable classes
+      sendBtn = document.querySelector('button.flex.size-6.items-center.justify-center.rounded-full.bg-foreground.text-background');
+      if (sendBtn) return sendBtn;
+      
+      // Fallback: Look for any button with rounded-full and bg-foreground (key identifiers)
+      sendBtn = document.querySelector('button.rounded-full.bg-foreground');
+      if (sendBtn) return sendBtn;
+      
+      // Second fallback: look for submit button
       sendBtn = document.querySelector('button[type="submit"]');
       if (sendBtn) return sendBtn;
       
-      // Second try: look for buttons with send-related aria-labels or titles
+      // Third fallback: look for buttons with send-related aria-labels
       sendBtn = document.querySelector('button[aria-label*="Send"], button[title*="Send"]');
       if (sendBtn) return sendBtn;
       
-      // Third try: look for any button that contains "Send" text
-      const buttons = Array.from(document.querySelectorAll('button'));
-      sendBtn = buttons.find(btn => {
-        const text = btn.textContent?.toLowerCase() || '';
-        const ariaLabel = btn.getAttribute('aria-label')?.toLowerCase() || '';
-        return text.includes('send') || ariaLabel.includes('send');
-      });
-      if (sendBtn) return sendBtn;
-      
-      // Fourth try: look for buttons near the textarea
+      // Fourth fallback: look for any button near the textarea that isn't disabled
       const textArea = document.querySelector('textarea');
       if (textArea) {
         const form = textArea.closest('form');
@@ -625,18 +717,9 @@
           sendBtn = form.querySelector('button:not([disabled])');
           if (sendBtn) return sendBtn;
         }
-        
-        // Look for buttons in the same container
-        const container = textArea.parentElement;
-        if (container) {
-          sendBtn = container.querySelector('button:not([disabled])');
-          if (sendBtn) return sendBtn;
-        }
       }
       
-      // Last try: any enabled button on the page (risky but better than nothing)
-      sendBtn = document.querySelector('button:not([disabled])');
-      return sendBtn;
+      return null; // Return null if no send button found
     },
 
     _setupCompletionDetection(resolve, reject) {
