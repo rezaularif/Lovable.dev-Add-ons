@@ -290,9 +290,20 @@
       const queueStack = document.createElement('div');
       queueStack.className = 'lovable-queue-stack';
       queueStack.style.cssText = `
-        margin-bottom: 12px;
+        margin-bottom: 6px;
         display: none;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        width: 100%;
+        flex: 1 1 100%;
+        text-align: left !important;
+        align-self: stretch;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
       `;
 
       // Queue list container - simple vertical list
@@ -301,7 +312,19 @@
       list.style.cssText = `
         display: flex;
         flex-direction: column;
-        gap: 2px;
+        gap: 1px;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+        width: 100%;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        text-align: left !important;
       `;
 
       queueStack.appendChild(list);
@@ -462,6 +485,104 @@
         minimalStyles.textContent = `
           .lovable-queue-remove:hover {
             opacity: 1 !important;
+            color: rgba(255, 255, 255, 0.8) !important;
+            background: rgba(255, 255, 255, 0.1) !important;
+            transform: scale(1.1);
+          }
+          
+          .lovable-queue-remove:active {
+            transform: scale(0.95);
+          }
+          
+          /* Global overrides to ensure left alignment */
+          .lovable-queue-stack {
+            display: block !important;
+            width: 100% !important;
+            padding-left: 0 !important;
+            margin-left: 0 !important;
+          }
+          
+          .queue-list {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            justify-content: flex-start !important;
+            width: 100% !important;
+            padding-left: 0 !important;
+            margin-left: 0 !important;
+          }
+          
+          .lovable-queue-item {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            width: 100% !important;
+            text-align: left !important;
+          }
+          
+          .lovable-queue-item > * {
+            text-align: left !important;
+          }
+          
+          .lovable-queue-remove {
+            margin-left: auto !important;
+            margin-right: 0 !important;
+          }
+          
+          /* Shimmering animation for status */
+          @keyframes shimmer {
+            0% {
+              opacity: 0.4;
+              transform: translateX(0) scale(1);
+            }
+            25% {
+              opacity: 0.7;
+              transform: translateX(0.5px) scale(1.02);
+            }
+            50% {
+              opacity: 1;
+              transform: translateX(0) scale(1.05);
+            }
+            75% {
+              opacity: 0.7;
+              transform: translateX(-0.5px) scale(1.02);
+            }
+            100% {
+              opacity: 0.4;
+              transform: translateX(0) scale(1);
+            }
+          }
+          
+          .queue-status-shimmer {
+            animation: shimmer 2s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+            will-change: opacity, transform;
+          }
+          
+          /* Faster shimmer for sending state */
+          .queue-status-sending {
+            animation: shimmer 1s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+            will-change: opacity, transform;
+          }
+          
+          /* Pulse animation for error state */
+          @keyframes pulse-error {
+            0% {
+              opacity: 0.5;
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(1.02);
+            }
+            100% {
+              opacity: 0.5;
+              transform: scale(1);
+            }
+          }
+          
+          .queue-status-error {
+            animation: pulse-error 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+            will-change: opacity, transform;
           }
         `;
         document.head.appendChild(minimalStyles);
@@ -470,81 +591,161 @@
       // Render queue items with minimal styling
       this._queue.forEach((prompt, idx) => {
         const isFirst = idx === 0;
+        console.log('PromptQueue: Rendering item', idx, 'isFirst:', isFirst, 'state:', this._state);
         
         const item = document.createElement('div');
         item.className = 'lovable-queue-item';
         item.style.cssText = `
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 0;
           padding: 4px 0;
-          font-size: 11px;
-          color: rgba(255, 255, 255, 0.8);
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.95);
           margin-bottom: 2px;
+          margin-top: 0px;
+          text-align: left !important;
+          justify-content: flex-start !important;
+          width: 100%;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+          line-height: 1.3;
+          min-height: 20px;
         `;
         
         // Position number
         const position = document.createElement('span');
         position.style.cssText = `
-          font-size: 10px;
-          font-weight: 500;
-          color: rgba(255, 255, 255, 0.6);
-          width: 16px;
-          text-align: center;
+          font-size: 11px;
+          font-weight: 600;
+          color: rgba(255, 255, 255, 0.85);
+          min-width: 20px;
+          width: 20px;
+          text-align: left !important;
+          flex-shrink: 0;
+          flex-grow: 0;
+          display: inline-flex;
+          align-items: center;
+          margin-left: 0 !important;
+          margin-right: 6px !important;
+          padding-left: 0 !important;
+          line-height: 1;
         `;
         position.textContent = `${idx + 1}.`;
         
         // Prompt text
         const text = document.createElement('span');
         text.style.cssText = `
-          flex: 1;
+          flex: 1 1 auto;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
-          font-weight: 400;
+          font-weight: 500;
+          text-align: left !important;
+          display: block;
+          margin-left: 0 !important;
+          margin-right: 8px !important;
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+          line-height: 1.3;
+          min-width: 0;
+          color: rgba(255, 255, 255, 0.95);
         `;
         const displayText = prompt.length > 60 ? prompt.substring(0, 60) + '...' : prompt;
         text.textContent = displayText;
         text.title = prompt;
-        
-        // Status for first item only
-        if (isFirst) {
-          const status = document.createElement('span');
-          status.style.cssText = `
-            font-size: 9px;
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.5);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-          `;
-          status.textContent = `[${this._state === State.RUNNING ? 'SENDING' : 
-                                    this._state === State.ERRORED ? 'FAILED' : 'NEXT'}]`;
-          item.appendChild(status);
-        }
         
         // Remove button
         const remove = document.createElement('button');
         remove.className = 'lovable-queue-remove';
         remove.style.cssText = `
           border: none;
-          background: none;
-          color: rgba(255, 255, 255, 0.3);
+          background: transparent;
+          color: rgba(255, 255, 255, 0.6);
           cursor: pointer;
-          font-size: 12px;
-          padding: 0;
-          width: 16px;
-          height: 16px;
-          opacity: 0.5;
+          font-size: 14px;
+          padding: 2px;
+          width: 18px;
+          height: 18px;
+          opacity: 0.7;
+          flex-shrink: 0;
+          text-align: center;
+          margin-left: auto;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          line-height: 1;
+          position: relative;
+          z-index: 10;
+          transition: all 0.2s ease;
         `;
         remove.innerHTML = '×';
-        remove.title = 'Remove';
-        remove.addEventListener('click', (e) => {
-          e.stopPropagation();
-          this._removeQueueItem(idx);
-        });
+        remove.title = 'Remove from queue';
+        remove.type = 'button'; // Explicitly set button type
         
-        // Assemble the item
+        // Add multiple event handlers to ensure it works
+        remove.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log('PromptQueue: Remove button clicked for index:', idx);
+          this._removeQueueItem(idx);
+        };
+        
+        // Also add mousedown handler as backup
+        remove.onmousedown = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        };
+        
+        // Status for first item only (add after text, before remove button)
+        let status = null;
+        if (isFirst) {
+          console.log('PromptQueue: Creating status element for first item, state:', this._state);
+          status = document.createElement('span');
+          status.style.cssText = `
+            font-size: 10px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+            flex-grow: 0;
+            margin-left: 0 !important;
+            margin-right: 8px !important;
+            display: inline-block;
+            line-height: 1;
+            white-space: nowrap;
+            min-width: 60px;
+            transition: all 0.3s ease;
+            opacity: 1;
+          `;
+          
+          // Set color, text and animation class based on state
+          if (this._state === State.RUNNING) {
+            status.style.color = '#8D6FEB'; // Purple for sending
+            status.textContent = '[SENDING]';
+            status.className = 'queue-status-shimmer queue-status-sending';
+          } else if (this._state === State.ERRORED) {
+            status.style.color = '#dc3545'; // Red for failed
+            status.textContent = '[FAILED]';
+            status.className = 'queue-status-shimmer queue-status-error';
+          } else {
+            status.style.color = '#22c55e'; // Green for next
+            status.textContent = '[NEXT]';
+            status.className = 'queue-status-shimmer';
+          }
+          
+          console.log('PromptQueue: Status text set to:', status.textContent);
+        }
+        
+        // Assemble the item in correct order
         item.appendChild(position);
+        if (status) {
+          console.log('PromptQueue: Appending status element');
+          item.appendChild(status);
+        }
         item.appendChild(text);
         item.appendChild(remove);
         
@@ -555,10 +756,34 @@
     // No longer needed for integrated UI
     
     _removeQueueItem(index) {
-      this._queue.splice(index, 1);
+      console.log('PromptQueue: Removing item at index:', index, 'from queue of length:', this._queue.length);
+      
+      // Validate index
+      if (index < 0 || index >= this._queue.length) {
+        console.error('PromptQueue: Invalid index for removal:', index);
+        return;
+      }
+      
+      // Remove the item
+      const removed = this._queue.splice(index, 1);
+      console.log('PromptQueue: Removed item:', removed[0]?.substring(0, 50) + '...');
+      
+      // Update UI
       this._renderQueue();
       this._updateQueueIndicator();
       this._emitter.emit('queueChanged', this._queue.slice());
+      
+      // If we removed the first item while it was running, we need to handle that
+      if (index === 0 && this._state === State.RUNNING) {
+        console.log('PromptQueue: Removed currently running prompt, resetting state');
+        this._currentPrompt = null;
+        this._setState(State.IDLE);
+        
+        // Continue with the next prompt if any
+        if (this._queue.length > 0) {
+          setTimeout(() => this._dequeueAndSend(), 500);
+        }
+      }
     },
 
     _setState(next, meta) {
@@ -595,6 +820,10 @@
         if (this._queue.length) {
           // brief yield to allow UI settle
           setTimeout(() => this._dequeueAndSend(), 200);
+        } else {
+          // Queue is now empty, ensure state is properly reset
+          console.log('PromptQueue: Queue is now empty after processing last item');
+          this._setState(State.IDLE);
         }
       } catch (err) {
         console.error('Send failed:', err);
@@ -802,10 +1031,16 @@
       // Most Lovable responses complete within 15-30 seconds
       let simpleTimeout = setTimeout(() => {
         if (!isCompleted) {
-          console.log('PromptQueue: Simple timeout completion (15 seconds)');
+          // If this is the last item in queue, use a shorter timeout
+          const isLastItem = this._queue.length === 1;
+          if (isLastItem) {
+            console.log('PromptQueue: Last item in queue - using shorter timeout (10 seconds)');
+          } else {
+            console.log('PromptQueue: Simple timeout completion (15 seconds)');
+          }
           complete();
         }
-      }, 15000); // 15 second simple completion
+      }, this._queue.length === 1 ? 10000 : 15000); // Shorter timeout for last item
       
       // Strategy 4: Fallback timeout for longer responses
       let fallbackTimeout = setTimeout(() => {
@@ -823,14 +1058,31 @@
         });
       }
       
-      // Initial check
+      // Initial check and periodic checking
       setTimeout(checkSendButton, 1000);
+      
+      // Check send button state periodically
+      const checkInterval = setInterval(() => {
+        if (isCompleted) {
+          clearInterval(checkInterval);
+          return;
+        }
+        
+        // Re-find the send button in case it was recreated
+        const currentSendBtn = this._findSendButton();
+        if (currentSendBtn && !currentSendBtn.disabled && sendBtnWasDisabled) {
+          console.log('PromptQueue: Send button found enabled during periodic check');
+          clearInterval(checkInterval);
+          setTimeout(complete, 500);
+        }
+      }, 500); // Check every 500ms
       
       // Cleanup function
       cleanup = () => {
         clearTimeout(timeoutId);
         clearTimeout(simpleTimeout);
         clearTimeout(fallbackTimeout);
+        clearInterval(checkInterval);
         try {
           mutationObserver.disconnect();
         } catch (e) {

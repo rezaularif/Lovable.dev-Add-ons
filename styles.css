@@ -913,29 +913,26 @@ div.relative.flex.flex-shrink.flex-grow.justify-between.gap-1.overflow-x-auto.pl
 
 .lovable-queue-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   padding: 8px 12px;
-  border: 1px solid var(--lovable-border-color);
+  border: none;
   border-radius: 8px;
-  background: var(--lovable-highlight-color);
+  background: transparent;
   color: var(--lovable-text-primary);
   font-size: 13px;
   transition: all 0.2s ease;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  text-align: left;
 }
 
 .lovable-queue-item:hover {
-  border-color: var(--lovable-button-primary);
-  background: rgba(0, 162, 234, 0.05);
-  transform: translateX(2px);
+  background: transparent;
+  transform: none;
 }
 
 .lovable-queue-item:first-child {
-  border-color: var(--lovable-button-primary);
-  background: rgba(0, 162, 234, 0.1);
-  box-shadow: 0 0 0 1px rgba(0, 162, 234, 0.2);
+  background: transparent;
+  box-shadow: none;
 }
 
 .lovable-queue-item span {
