@@ -1,5 +1,6 @@
 /**
- * @fileoverview Integrated Prompt Queue for Lovable Add-ons.
+ * @fileoverview Integrated Prompt Queue for Lovable Add-ons (Optimized).
+ * 
  * Implements a seamlessly integrated prompt queue system that appears above the chat input with:
  * - Stacked visual prompt cards showing queue position and status
  * - Automatic sequential processing without manual intervention
@@ -8,21 +9,11 @@
  * - Easy management with click-to-remove functionality
  * - Graceful error handling with clear visual feedback
  * 
- * Design Features:
- * - Seamless integration above chat input (zero UI clutter)
- * - Numbered position indicators with visual hierarchy
- * - Card-based design matching Lovable.dev aesthetics
- * - Responsive layout adapting to different screen sizes
- * - Accessible with proper hover states and tooltips
- * - Modern animations and smooth transitions
- * 
- * Technical Features:
- * - Detects Lovable.dev chat interface automatically
- * - Efficient DOM integration with optimized rendering
- * - Smart page detection (project pages vs homepage)
- * - Performance optimized with throttled observers
+ * Performance optimizations:
+ * - Throttled mutation observers for better performance
+ * - Debounced rendering to prevent excessive DOM updates
+ * - Efficient DOM selectors for cross-browser compatibility
  * - Memory management with proper cleanup on navigation
- * - Cross-browser compatible DOM selectors
  */
 (function () {
   'use strict';
@@ -52,7 +43,6 @@
 
   /**
    * Queue states
-   * idle | running | errored
    */
   const State = {
     IDLE: 'idle',
@@ -62,19 +52,18 @@
 
   /**
    * DOM selectors for lovable chat composer/buttons/messages.
-   * Updated with more robust selectors for better detection.
+   * Updated with cross-browser compatible selectors.
    */
   const SELECTORS = {
-    // Primary composer elements - broader and more flexible selectors
-    textArea: 'textarea, input[type="text"][placeholder*="message"], input[type="text"][placeholder*="chat"], input[type="text"][placeholder*="prompt"]',
-    chatForm: 'form, div:has(textarea), div:has(input[placeholder*="message"]), div:has(input[placeholder*="chat"]), div:has(input[placeholder*="prompt"])',
-    // Button bar container - more flexible detection
-    buttonBar: 'div:has(button[type="submit"]), div:has(button:contains("Send")), form > div, div.flex:has(button)',
-    // Native send/stop buttons - broader selection
-    nativeSendBtn: 'button[type="submit"], button[aria-label*="Send"], button[title*="Send"], button:contains("Send"), button:has(svg)',
-    nativeStopBtn: 'button[aria-label*="Stop"], button[title*="Stop"], button:contains("Stop"), button:has(svg[class*="stop"]), button:has(.stop-icon)',
+    // Primary composer elements - simplified selectors
+    textArea: 'textarea',
+    chatForm: 'form',
+    // Native send/stop buttons - simplified selection
+    nativeSendBtn: 'button[type="submit"]',
+    alternativeSendBtn: 'button[aria-label*="Send"], button[title*="Send"]',
+    nativeStopBtn: 'button[aria-label*="Stop"], button[title*="Stop"]',
     // Chat log where assistant messages appear
-    chatLog: 'div[role="log"], .chat-messages, .ChatMessageContainer, main [data-radix-scroll-area-viewport], main div[role="log"], [role="main"] div, main'
+    chatLog: 'div[role="log"], .chat-messages, main'
   };
 
   /**
@@ -82,14 +71,18 @@
    */
   function findFirst(selectors) {
     for (const sel of selectors) {
-      const el = document.querySelector(sel);
-      if (el) return el;
+      try {
+        const el = document.querySelector(sel);
+        if (el) return el;
+      } catch (e) {
+        console.warn('Invalid selector:', sel);
+      }
     }
     return null;
   }
 
   /**
-   * PromptQueue core
+   * PromptQueue core - restored working implementation with optimizations
    */
   const PromptQueue = {
     _state: State.IDLE,
@@ -100,6 +93,10 @@
     _ui: null,
     _observer: null,
     _chatObserver: null,
+    _keyboardHandler: null,
+    _mainTextArea: null,
+    _renderTimeout: null,
+    _queueIndicator: null,
 
     get state() { return this._state; },
     get size() { return this._queue.length; },
@@ -158,10 +155,15 @@
     },
 
     stop() {
-      // Click native Stop if available
-      const stopBtn = findFirst([SELECTORS.nativeStopBtn, `${SELECTORS.chatForm} button:has(svg)`]);
+      // Click native Stop if available - simplified approach
+      const stopBtns = document.querySelectorAll('button');
+      const stopBtn = Array.from(stopBtns).find(btn => {
+        const text = btn.textContent?.toLowerCase() || '';
+        const ariaLabel = btn.getAttribute('aria-label')?.toLowerCase() || '';
+        return text.includes('stop') || ariaLabel.includes('stop');
+      });
       if (stopBtn) stopBtn.click();
-      // We do not change state yet; completion/error will be observed
+      // State will be updated by completion detection
     },
 
     retryLastError() {
@@ -913,6 +915,9 @@
   LovableAddons.registerFeature('promptQueue', {
     init() {
       PromptQueue.init();
+    },
+    getInstance() {
+      return PromptQueue;
     }
   });
 
@@ -920,4 +925,5 @@
   document.addEventListener('DOMContentLoaded', () => {
     PromptQueue.init();
   });
+
 })();
