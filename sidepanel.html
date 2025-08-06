@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Lovable Add-ons Settings</title>
+    <style>
+        :root {
+            --lovable-bg-primary: #0F0F0F;
+            --lovable-bg-secondary: #1C1C1C;
+            --lovable-text-primary: rgba(255, 255, 255, 0.9);
+            --lovable-text-secondary: rgba(255, 255, 255, 0.7);
+            --lovable-border-color: rgba(255, 255, 255, 0.15);
+            --lovable-input-bg: #2D2D2D;
+            --lovable-button-primary: #2563EB;
+            --lovable-button-hover: #1D4ED8;
+            --lovable-button-danger: #DC2626;
+            --lovable-button-danger-hover: #B91C1C;
+            --lovable-success-bg: #059669;
+            --lovable-error-bg: #DC2626;
+            --lovable-highlight-color: rgba(255, 255, 255, 0.1);
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                --lovable-bg-primary: #F9F3EA;
+                --lovable-bg-secondary: #FFFFFF;
+                --lovable-text-primary: rgba(0, 0, 0, 0.9);
+                --lovable-text-secondary: rgba(0, 0, 0, 0.7);
+                --lovable-border-color: rgba(0, 0, 0, 0.15);
+                --lovable-input-bg: #F5F5F5;
+                --lovable-highlight-color: rgba(0, 0, 0, 0.05);
+            }
+        }
+
+        body {
+            background: var(--lovable-bg-primary);
+            color: var(--lovable-text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            max-width: 100%;
+        }
+
+        .header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--lovable-border-color);
+        }
+
+        .header img {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--lovable-text-primary);
+            user-select: none;
+        }
+
+        .settings-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--lovable-text-secondary);
+            user-select: none;
+        }
+
+        input, select {
+            background: var(--lovable-input-bg);
+            border: 1px solid var(--lovable-border-color);
+            border-radius: 6px;
+            color: var(--lovable-text-primary);
+            font-size: 14px;
+            padding: 10px 12px;
+            width: 100%;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--lovable-button-primary);
+            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.15);
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2371717A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 36px;
+            cursor: pointer;
+        }
+
+        button {
+            background: var(--lovable-button-primary);
+            border: none;
+            border-radius: 6px;
+            color: #FFFFFF;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 10px;
+            width: 100%;
+            transition: all 0.2s ease;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            height: 40px;
+        }
+
+        button:hover {
+            background: var(--lovable-button-hover);
+        }
+
+        button:focus {
+            outline: 2px solid var(--lovable-button-primary);
+            outline-offset: 2px;
+        }
+
+        button.remove {
+            background: var(--lovable-button-danger);
+        }
+
+        button.remove:hover {
+            background: var(--lovable-button-danger-hover);
+        }
+
+        button svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            stroke-width: 2;
+            transition: transform 0.2s ease;
+        }
+
+        button:hover svg {
+            transform: scale(1.1);
+        }
+
+        button:active svg {
+            transform: scale(0.95);
+        }
+
+        .info {
+            color: var(--lovable-text-secondary);
+            font-size: 12px;
+            text-align: center;
+            line-height: 1.4;
+            padding-top: 12px;
+            border-top: 1px solid var(--lovable-border-color);
+        }
+
+        .success-message {
+            background: var(--lovable-success-bg);
+            color: white;
+            font-size: 13px;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            transform: translateY(100px);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .success-message.show {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            background: var(--lovable-error-bg);
+        }
+
+        [aria-invalid="true"] {
+            border-color: var(--lovable-error-bg);
+        }
+
+        .input-error {
+            color: var(--lovable-error-bg);
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+
+
+        .button-description {
+            font-size: 12px;
+            color: var(--lovable-text-secondary);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" role="main">
+        <div class="header">
+            <img src="Lovable-addons-logo.ico" alt="Lovable Add-ons" width="24" height="24">
+            <h2>Lovable Add-ons</h2>
+        </div>
+        <form class="settings-form" autocomplete="off">
+            <div class="form-group">
+                <label for="groqApiKey">API Key</label>
+                <input
+                    type="password"
+                    id="groqApiKey"
+                    name="groqApiKey"
+                    placeholder="Enter Groq API key"
+                    spellcheck="false"
+                    aria-required="true"
+                    aria-describedby="apiKeyError"
+                />
+                <div id="apiKeyError" class="input-error" role="alert" hidden></div>
+            </div>
+
+            <div class="form-group">
+                <label for="groqModel">Model</label>
+                <select
+                    id="groqModel"
+                    name="groqModel"
+                    aria-label="Select AI model"
+                >
+                    <option value="deepseek-r1-distill-llama-70b">DeepSeek Llama 70B</option>
+                    <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
+                    <option value="gemma2-9b-it">Gemma2 9B</option>
+                    <option value="llama-3.3-70b-versatile">LLaMA 3.3 70B</option>
+                </select>
+            </div>
+
+            <button type="button" id="saveSettings" aria-live="polite">
+                <svg class="save-icon" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 6L9 17l-5-5"/>
+                </svg>
+                <span>Save</span>
+            </button>
+        </form>
+
+        <div class="info" role="note">
+            Your API key is securely encrypted in your browser
+        </div>
+    </div>
+
+    <div id="successMessage" class="success-message" role="status" aria-live="polite" hidden>
+        Settings saved successfully
+    </div>
+
+    <script src="src/sidepanel.js"></script>
+</body>
+</html>

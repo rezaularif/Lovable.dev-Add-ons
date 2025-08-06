@@ -1,0 +1,29 @@
+# Documentation files
+docs/
+project-doc.md
+project-overview.md
+roadmap.md
+PROMPT_QUEUE_README.md
+PROMPT_QUEUE_TROUBLESHOOTING.md
+
+# Test files
+test-*.html
+
+# Temporary files
+*.tmp
+*.log
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node modules (if any)
+node_modules/
+
+# Build files
+dist/
+build/

@@ -1,0 +1,72 @@
+{
+  "templates": [
+    {
+      "id": "mobile-responsiveness",
+      "name": "Mobile Responsiveness",
+      "category": "Performance",
+      "content": "Optimize the entire app for mobile devices, ensuring that all components scale proportionally and function seamlessly on smaller screens without altering the app's existing design or core functionality. If uncertainties arise during implementation, pause to propose and review alternative solutions before proceeding."
+    },
+    {
+      "id": "font-optimization",
+      "name": "Font Optimization",
+      "category": "Performance",
+      "content": "Analyze the existing approach for loading custom fonts and icons, and provide recommendations or code modifications to optimize their loading efficiency"
+    },
+    {
+      "id": "app-optimisation",
+      "name": "App Optimisation",
+      "category": "Performance",
+      "content": "Analyze the current application to identify performance bottlenecks and optimization opportunities. Provide a detailed approach outlining the recommended improvements before making any code modifications. Ensure that optimizations enhance speed and efficiency without breaking existing functionality or altering any working features. Once the approach is approved, implement the necessary changes while maintaining code integrity."
+    },
+    {
+      "id": "fix-errors",
+      "name": "Fix Errors",
+      "category": "Debugging",
+      "content": "The error persists. Do not modify the code yet. Investigate the root cause by thoroughly analyzing logs, flow, and dependencies. Only propose solutions after fully understanding the issue."
+    },
+    {
+      "id": "code-optimization",
+      "name": "Code Optimization",
+      "category": "Performance",
+      "content": "Please help me optimize this code for better performance. Consider:\n1. Time complexity\n2. Space complexity\n3. Resource usage\n4. Caching opportunities\n5. Algorithm improvements\n\n[Paste code here]"
+    },
+    {
+      "id": "on-page-seo",
+      "name": "On-Page SEO Enhancement",
+      "category": "SEO",
+      "content": "Optimize the app's on-page SEO by improving title tags, meta descriptions, headings (H1-H6), and image alt attributes. Ensure proper keyword placement without overstuffing. Validate and propose improvements before implementation"
+    },
+    {
+      "id": "seo-url-structure",
+      "name": "SEO-Friendly URL Structure & Routing",
+      "category": "SEO",
+      "content": "Review the current URL structure and optimize it for SEO. Ensure clean, readable, and keyword-rich URLs without unnecessary parameters. Fix duplicate content issues using canonicalization. Provide a structured approach before implementing changes"
+    },
+    {
+      "id": "code-refactoring",
+      "name": "Code Refactoring",
+      "category": "Code Quality",
+      "content": "Please help me refactor this code to improve its:\n1. Readability\n2. Maintainability\n3. Reusability\n4. Testability\n5. Adherence to SOLID principles\n\n"
+    },
+    {
+      "id": "security-review",
+      "name": "Security Review",
+      "category": "Security",
+      "content": "Please perform a security review of this code/system with focus on:\n1. Input validation\n2. Authentication/Authorization\n3. Data protection\n4. Common vulnerabilities (XSS, CSRF, SQL Injection, etc.)\n5. Secure communication\n6. Error handling\n\n"
+    },
+    {
+      "id": "database-design",
+      "name": "Database Design",
+      "category": "Database",
+      "content": "Help me design a database schema for:\n\n1. Project requirements:\n2. Entities and relationships:\n3. Data types and constraints:\n4. Indexing strategy:\n5. Performance considerations:\n6. Scaling considerations:\n\n"
+    }
+  ],
+  "categories": [
+    "Performance",
+    "Debugging",
+    "SEO",
+    "Code Quality",
+    "Security",
+    "Database"
+  ]
+}
