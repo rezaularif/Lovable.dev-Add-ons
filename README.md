@@ -43,7 +43,7 @@ A powerful Chrome extension that enhances your Lovable.dev development workflow 
 ## 🚀 Installation
 
 ### From Chrome Web Store (Recommended)
-1. Visit the [Chrome Web Store listing](https://chrome.google.com/webstore/detail/lovabledev-add-ons/)
+1. Visit the [Chrome Web Store listing](https://chromewebstore.google.com/detail/lovabledev-add-ons/kbacddfmjjdomaadfckjdhclgaghmjpi)
 2. Click "Add to Chrome"
 3. Confirm the installation when prompted
 4. The extension icon will appear in your browser toolbar
@@ -207,7 +207,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 Links
 
-- [Chrome Web Store](https://chrome.google.com/webstore/detail/lovabledev-add-ons/)
+- [Chrome Web Store](https://chromewebstore.google.com/detail/lovabledev-add-ons/kbacddfmjjdomaadfckjdhclgaghmjpi)
 - [GitHub Repository](https://github.com/yourusername/lovable-dev-addons)
 - [Documentation](docs/)
 - [Lovable.dev](https://lovable.dev)
